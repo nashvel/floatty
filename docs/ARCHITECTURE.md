@@ -35,3 +35,24 @@ The website is separate from the desktop app. Its builder copies `site/` and
 public visual assets into `dist/site/`, validates internal links and rejects
 links that escape the published directory. Source packaging uses an allowlist;
 neither process publishes by itself.
+
+The desktop shortcut uses the stable application ID
+`io.github.nashvel.Floatty.desktop`. Installation retires both legacy
+`codex-island.desktop` and `io.github.nashvel.CodexIsland.desktop` shortcuts
+and migrates their GNOME favorite entries, when present, to avoid cached launch paths from earlier repository locations.
+
+`header_pet.py` draws the compact interactive mascot directly in Tk, with no image
+dependencies. It observes the island state and Motion preference. Petting and
+idle naps never launch or interrupt Codex, change the current folder, or toggle
+the island. Its timer stops on destruction and skips drawing while hidden.
+
+The mascot reads the current desktop pointer through Tk and computes a bounded
+eye offset relative to its current screen position. It continues tracking outside
+the header and after the island is dragged. Reduced motion retains direct cursor
+responses without automatic bobbing or blinking; sleeping and hidden pets skip
+pointer reads. Cursor coordinates are never persisted.
+
+Floatty is the application name. The existing checkout and GitHub repository
+remain named `codex-island`; links and supplied logo filenames preserve that
+history. The launch-screen ASCII pet is a separate, lightweight Tk animation
+that stops drawing when the native terminal replaces it.

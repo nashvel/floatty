@@ -28,4 +28,4 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          gh release create "$RELEASE_TAG" dist/releases/* --draft --verify-tag --title "Codex Island $RELEASE_TAG" --notes "Linux source distribution. Extract the archive and follow README.md. System GTK3/VTE, Tk, and Codex CLI are required."
+          gh release create "$RELEASE_TAG" dist/releases/* --draft --verify-tag --title "Floatty $RELEASE_TAG" --notes "Linux source distribution. Extract the archive and follow README.md. System GTK3/VTE, Tk, and Codex CLI are required."

@@ -1,4 +1,4 @@
-"""Opt-in desktop acceptance checks: CODEX_ISLAND_UI_TEST=1 python3 -m unittest discover -s tests -v."""
+"""Opt-in desktop acceptance checks: FLOATTY_UI_TEST=1 python3 -m unittest discover -s tests -v."""
 import os
 import sys
 import tempfile
@@ -16,7 +16,7 @@ from island import Island
 from runtime import Container, Listener, identity
 
 
-@unittest.skipUnless(os.environ.get('CODEX_ISLAND_UI_TEST') == '1', 'Desktop acceptance is opt-in')
+@unittest.skipUnless(os.environ.get('FLOATTY_UI_TEST', os.environ.get('CODEX_ISLAND_UI_TEST')) == '1', 'Desktop acceptance is opt-in')
 class DesktopTests(unittest.TestCase):
     def setUp(self):
         self.root = tk.Tk()
@@ -46,6 +46,92 @@ class DesktopTests(unittest.TestCase):
         self.root.after(milliseconds, self.root.quit)
         self.root.mainloop()
 
+    def test_pet_click_and_nap_do_not_launch_or_expand(self):
+        self.app.preview = False
+        with patch.object(self.app.terminal, 'start') as start:
+            self.app.pet.event_generate('<Button-1>', x=18, y=20)
+            self.root.update()
+            self.assertEqual(self.app.pet.mood, 'happy')
+            self.assertFalse(self.app.expanded)
+            start.assert_not_called()
+            self.app.pet.event_generate('<Button-3>', x=18, y=20)
+            self.assertTrue(self.app.pet.sleeping)
+            self.assertEqual(self.app.pet.mood, 'sleeping')
+            self.app.pet.pet()
+            self.assertFalse(self.app.pet.sleeping)
+            start.assert_not_called()
+
+    def test_pet_tracks_task_state_and_respects_reduced_motion(self):
+        pet = self.app.pet
+        self.app.state = 'Ready'
+        pet.nap()
+        self.assertEqual(pet.mood, 'sleeping')
+        self.app.terminal_event({'event': 'submitted'})
+        pet.draw(now=1)
+        self.assertFalse(pet.sleeping)
+        self.assertEqual(pet.mood, 'working')
+        pet.nap()
+        self.assertFalse(pet.sleeping)
+        self.app.notifications.set(False)
+        self.app.terminal_event({'event': 'completed'})
+        pet.draw(now=2)
+        self.assertEqual(pet.mood, 'celebrating')
+        self.assertEqual(len(pet.find_withtag('reaction')), 2)
+        self.app.state = 'Ready'
+        self.app.motion.set(False)
+        pet.draw(now=1)
+        first = [(pet.coords(i), pet.itemcget(i, 'fill')) for i in pet.find_all()]
+        pet.draw(now=4)
+        self.assertEqual(first, [(pet.coords(i), pet.itemcget(i, 'fill')) for i in pet.find_all()])
+        self.app.motion.set(True)
+        pet.draw(now=1)
+        moving = pet.coords(pet.find_withtag('body')[0])
+        pet.draw(now=2)
+        self.assertNotEqual(moving, pet.coords(pet.find_withtag('body')[0]))
+        pet.cancel_animation()
+        self.assertIsNone(pet.callback)
+
+    def test_pet_eyes_follow_desktop_cursor_outside_header(self):
+        pet = self.app.pet
+        self.app.state = 'Ready'
+        self.app.motion.set(False)
+        origin = (pet.winfo_rootx()+18, pet.winfo_rooty()+19)
+        self.assertFalse(pet.hover)
+        with patch.object(pet, 'winfo_pointerxy', return_value=(origin[0]+900, origin[1]+400)):
+            pet.draw(now=1)
+            right = pet.coords(pet.find_withtag('eyes')[0])
+            self.assertGreater(pet.gaze[0], 0)
+            self.assertGreater(pet.gaze[1], 0)
+            self.assertLessEqual(abs(pet.gaze[0]), 2.8)
+            self.assertLessEqual(abs(pet.gaze[1]), 1.8)
+        with patch.object(pet, 'winfo_pointerxy', return_value=(origin[0]-900, origin[1]-400)):
+            pet.leave(None)
+            left = pet.coords(pet.find_withtag('eyes')[0])
+            self.assertLess(pet.gaze[0], 0)
+            self.assertLess(pet.gaze[1], 0)
+            self.assertLess(left[0], right[0])
+            self.assertLess(left[1], right[1])
+        # Repositioning the island changes the direction to the same screen point.
+        with patch.object(pet, 'winfo_pointerxy', return_value=origin), patch.object(pet, 'winfo_rootx', return_value=origin[0]+100):
+            pet.draw(now=1)
+            self.assertLess(pet.gaze[0], 0)
+
+    def test_pet_cursor_tracking_sleeps_and_handles_unavailable_pointer(self):
+        pet = self.app.pet
+        self.app.state = 'Ready'
+        pet.nap()
+        with patch.object(pet, 'winfo_pointerxy') as pointer:
+            pet.draw(now=1)
+            pointer.assert_not_called()
+            self.assertEqual(pet.gaze, (0, 0))
+        pet.nap()
+        with patch.object(pet, 'winfo_pointerxy', side_effect=tk.TclError('Pointer unavailable')):
+            pet.draw(now=1)
+            self.assertEqual(pet.gaze, (0, 0))
+        with patch.object(pet, 'winfo_pointerxy', return_value=(-1, -1)):
+            pet.draw(now=1)
+            self.assertEqual(pet.gaze, (0, 0))
+
     def test_window_is_managed_borderless_and_visible(self):
         self.assertFalse(self.root.overrideredirect())
         self.assertTrue(self.root.winfo_viewable())
@@ -69,7 +155,7 @@ class DesktopTests(unittest.TestCase):
                 self.assertLess(picker.use_button.winfo_rooty()+picker.use_button.winfo_height(),
                                 picker.winfo_rooty()+picker.winfo_height())
                 self.assertIsNone(self.root.grab_current())
-                subprocess.run(['import', '-window', str(picker.winfo_id()), '/tmp/codex-island-folder.png'], check=True, timeout=5)
+                subprocess.run(['import', '-window', str(picker.winfo_id()), '/tmp/floatty-folder.png'], check=True, timeout=5)
                 self.assertEqual(self.app.launch_button.cget('state'), 'disabled')
                 heartbeat = []
                 self.root.after(20, lambda: heartbeat.append(True))
@@ -160,6 +246,31 @@ class DesktopTests(unittest.TestCase):
         self.root.update()
         self.assertFalse(logo.winfo_ismapped())
 
+    def test_floatty_name_and_center_ascii_pet_play(self):
+        self.assertEqual(self.root.title(), 'Floatty')
+        self.assertEqual(self.app.title.cget('text'), 'FLOATTY')
+        self.app.collapse()
+        self.root.update()
+        logo = self.app.terminal_hint
+        self.assertEqual(len(logo.find_withtag('pet')), 6)
+        self.assertEqual(len(logo.find_withtag('ball')), 1)
+        self.assertEqual(logo.itemcget(logo.find_withtag('caption')[0], 'text'), 'F L O A T T Y')
+        self.app.motion.set(True)
+        logo.draw(now=1)
+        position = logo.coords(logo.find_withtag('pet')[0])
+        logo.draw(now=2)
+        self.assertNotEqual(position, logo.coords(logo.find_withtag('pet')[0]))
+        with patch.object(self.app.terminal, 'start') as start, patch('ascii_logo.time.monotonic', return_value=5):
+            logo.event_generate('<Button-1>', x=210, y=100)
+            self.assertTrue(logo.find_withtag('reaction'))
+            self.assertEqual(logo.play_until, 7.4)
+            start.assert_not_called()
+        self.app.motion.set(False)
+        logo.draw(now=6)
+        self.assertEqual(logo.itemcget(logo.find_withtag('reaction')[0], 'text'), 'hello!')
+        logo.draw(now=8)
+        self.assertFalse(logo.find_withtag('reaction'))
+
     def test_animation_intermediate_frame_and_rapid_reversal(self):
         self.app.motion.set(True)
         self.app.title.event_generate('<Button-1>', x=10, y=5)
@@ -213,20 +324,6 @@ class DesktopTests(unittest.TestCase):
         self.wait_frames(160)
         self.assertEqual(button.inset, 0)
 
-    def test_status_pulse_only_while_working_and_motion_enabled(self):
-        self.app.motion.set(True)
-        self.app.busy = True
-        self.app.state = 'Working'
-        with patch('island.time.monotonic', return_value=0.4):
-            self.app.pulse()
-            bright = self.app.dot.cget('fg')
-        with patch('island.time.monotonic', return_value=1.2):
-            self.app.pulse()
-            self.assertNotEqual(bright, self.app.dot.cget('fg'))
-        self.app.motion.set(False)
-        self.app.pulse()
-        self.assertEqual(self.app.dot.cget('fg'), '#f0bd75')
-
     def test_layout_collapse_tabs_and_screenshot(self):
         self.assertFalse(self.app.body.winfo_ismapped())
         self.assertEqual((self.root.winfo_width(), self.root.winfo_height()), (320, 58))
@@ -235,12 +332,12 @@ class DesktopTests(unittest.TestCase):
         self.root.update()
         self.assertTrue(self.app.body.winfo_ismapped())
         # Capture only the app window; no desktop contents.
-        subprocess.run(['import', '-window', str(self.root.winfo_id()), '/tmp/codex-island-chat.png'], check=True, timeout=5)
+        subprocess.run(['import', '-window', str(self.root.winfo_id()), '/tmp/floatty-chat.png'], check=True, timeout=5)
         self.app.collapse()
         self.root.update()
         self.assertFalse(self.app.body.winfo_ismapped())
         self.assertEqual(self.root.winfo_height(), 58)
-        subprocess.run(['import', '-window', str(self.root.winfo_id()), '/tmp/codex-island-compact.png'], check=True, timeout=5)
+        subprocess.run(['import', '-window', str(self.root.winfo_id()), '/tmp/floatty-compact.png'], check=True, timeout=5)
         self.app.collapse()
         with patch.object(self.app, 'refresh'):
             self.app.show_tab('Services')
@@ -347,7 +444,7 @@ class DesktopTests(unittest.TestCase):
             self.assertEqual(self.app.status.get(), 'Permission denied')
             self.assertFalse(hasattr(self.app, 'transcript'))
         self.root.update()
-        subprocess.run(['import', '-window', str(self.root.winfo_id()), '/tmp/codex-island-services.png'], check=True, timeout=5)
+        subprocess.run(['import', '-window', str(self.root.winfo_id()), '/tmp/floatty-services.png'], check=True, timeout=5)
 
     def test_gui_stop_terminates_disposable_real_listener(self):
         child = subprocess.Popen([sys.executable, '-u', '-c',

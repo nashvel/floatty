@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible problem in Codex Island.
+description: Report a reproducible problem in Floatty.
 body:
   - type: textarea
     id: environment

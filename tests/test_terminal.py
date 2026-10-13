@@ -54,11 +54,11 @@ class TerminalContractTests(unittest.TestCase):
             session.close()
 
 
-@unittest.skipUnless(os.environ.get('CODEX_ISLAND_UI_TEST') == '1', 'Native terminal acceptance is opt-in')
+@unittest.skipUnless(os.environ.get('FLOATTY_UI_TEST', os.environ.get('CODEX_ISLAND_UI_TEST')) == '1', 'Native terminal acceptance is opt-in')
 class NativeTerminalTests(unittest.TestCase):
     def test_native_tty_keyboard_resize_and_manual_ctrl_c(self):
         root = tk.Tk()
-        root.title('Codex Island Terminal Acceptance')
+        root.title('Floatty Terminal Acceptance')
         root.overrideredirect(True)
         root.attributes('-topmost', True)
         root.geometry('640x400+40+40')
@@ -104,7 +104,7 @@ for line in sys.stdin:
                     if proof.exists():
                         break
                     time.sleep(0.02)
-                subprocess.run(['import','-window',str(frame.winfo_id()),'/tmp/codex-island-native-terminal.png'], check=True)
+                subprocess.run(['import','-window',str(frame.winfo_id()),'/tmp/floatty-native-terminal.png'], check=True)
                 initial = json.loads(proof.read_text())
                 self.assertTrue(initial['stdin_tty'])
                 self.assertTrue(initial['stdout_tty'])
@@ -121,24 +121,24 @@ for line in sys.stdin:
                 root.mainloop()
                 focused = subprocess.check_output(['xdotool','getwindowfocus','-f'], text=True).strip()
                 self.assertEqual(int(focused), started['window'], 'Refusing keyboard input outside the test terminal')
-                subprocess.run(['xdotool', 'type', '--clearmodifiers', 'hello'], check=True)
-                subprocess.run(['xdotool', 'key', 'Return'], check=True)
+                subprocess.run(['xdotool', 'type', '--window', str(started['window']), '--clearmodifiers', 'hello'], check=True)
+                subprocess.run(['xdotool', 'key', '--window', str(started['window']), 'Return'], check=True)
                 deadline = time.monotonic()+3
                 while time.monotonic() < deadline:
                     root.update()
                     if json.loads(proof.read_text()).get('input') == 'hello':
                         break
                     time.sleep(0.02)
-                subprocess.run(['import','-window',str(frame.winfo_id()),'/tmp/codex-island-native-terminal.png'], check=True)
+                subprocess.run(['import','-window',str(frame.winfo_id()),'/tmp/floatty-native-terminal.png'], check=True)
                 self.assertEqual(json.loads(proof.read_text()).get('input'), 'hello')
                 session.resize(800, 500)
                 root.after(200, root.quit)
                 root.mainloop()
                 self.assertNotEqual(initial['size'], json.loads(proof.read_text())['size'])
-                subprocess.run(['import','-window',str(frame.winfo_id()),'/tmp/codex-island-native-terminal.png'], check=True)
+                subprocess.run(['import','-window',str(frame.winfo_id()),'/tmp/floatty-native-terminal.png'], check=True)
                 focused = subprocess.check_output(['xdotool','getwindowfocus','-f'], text=True).strip()
                 self.assertEqual(int(focused), started['window'])
-                subprocess.run(['xdotool', 'key', '--clearmodifiers', 'ctrl+c'], check=True)
+                subprocess.run(['xdotool', 'key', '--window', str(started['window']), '--clearmodifiers', 'ctrl+c'], check=True)
                 deadline = time.monotonic()+3
                 while time.monotonic() < deadline and session.running:
                     root.update()

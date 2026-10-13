@@ -1,29 +1,36 @@
 <p align="center">
-  <img src="assets/branding/codex-island.svg" width="144" alt="Codex Island icon">
+  <img src="assets/branding/codex-island.svg" width="144" alt="Floatty icon">
 </p>
 
-# Codex Island
+# Floatty
 
 **A floating Codex terminal and local service controls for Linux.**
 
-Keep Codex within reach while you work. Codex Island sits above your desktop as a
+Keep Codex within reach while you work. Floatty sits above your desktop as a
 small, translucent pill. Click to expand it into a real terminal, launch Codex in
 your project folder, and receive a desktop notification when a turn completes.
 
-An independent desktop companion for the Codex CLI.
+An independent desktop companion for the Codex CLI. Formerly Codex Island.
+The current source repository remains `nashvel/codex-island`.
 
 ## Features
 
-- **Animated ASCII logo** — a floating capsule, terminal prompt, blinking cursor,
-  and lime toggle on the launch screen; the Motion setting also controls this animation.
+- **Interactive header pet** — a lime capsule mascot that blinks, follows
+  desktop cursor movement, reacts to pets, works with Codex, and celebrates completed turns.
+  Right-click toggles an idle nap; the Motion setting controls automatic animation.
+  Eyes follow the desktop cursor outside the island too, including with reduced motion.
+
+- **Animated ASCII logo** — a lime ASCII pet that bounces, waves, and plays with
+  a ball inside the launch-screen capsule. Click it for a playful reaction;
+  the Motion setting also controls this animation.
 - **Real terminal** — native GTK3/VTE rendering, ANSI colors, cursor movement,
   scrollback, resizing, and direct keyboard input.
 - **Launch Codex** — starts the installed CLI in your chosen directory with your
   existing sign-in and configuration.
 - **Compact island** — a draggable 320 × 58 pill that expands on a click.
 - **Translucent surface** — adjustable opacity with rounded panels and buttons.
-- **Motion effects** — eased expansion, hover fades, press effects, and a status
-  pulse; reduced motion is available.
+- **Motion effects** — eased expansion, hover fades, press effects, and pet
+  reactions; reduced motion is available.
 - **Completion notifications** — follow turns started inside the island.
 - **Local services** — inspect running Docker containers and listening TCP/UDP
   ports, then stop supported services through confirmed GUI actions.
@@ -34,11 +41,11 @@ An independent desktop companion for the Codex CLI.
 
 **Compact**
 
-![Compact Codex Island](assets/screenshots/compact.png)
+![Compact Floatty with interactive pet](assets/screenshots/compact.png)
 
 **Expanded**
 
-<img src="assets/screenshots/expanded.png" width="540" alt="Expanded island with Launch Codex, terminal area, and opacity controls">
+<img src="assets/screenshots/expanded.png" width="540" alt="Expanded island with interactive pet, ASCII logo, Launch Codex, and opacity controls">
 
 These screenshots show preview mode, before launching Codex. They contain no
 private conversations or desktop background. Project and executable paths in the
@@ -47,8 +54,9 @@ public screenshots are illustrative.
 ## Brand assets
 
 The project logo and its raster sizes, wordmark, tile, and monochrome variants
-are included in [`assets/branding`](assets/branding). The desktop shortcut uses
-`assets/branding/codex-island.svg`, and the app header and window icon use the matching PNG assets.
+are included in [`assets/branding`](assets/branding). The desktop shortcut and window icon use the supplied rounded-square tile.
+The app header uses an interactive mascot inspired by the lime capsule mark. The shortcut installer registers the
+SVG/PNG tile in your per-user icon directory and refreshes available desktop caches.
 
 ## Requirements
 
@@ -120,8 +128,11 @@ directly in the terminal. Codex starts only when you press Launch.
 | Control | Action |
 | --- | --- |
 | Click the header or + / − | Expand or collapse |
+| Click the pet / Enter or Space while focused | Pet the mascot without expanding or launching anything |
+| Right-click the pet | Toggle a nap when Codex is idle; submitting a task wakes it |
 | Drag the header | Reposition the island |
 | Folder | Open a non-blocking project-folder picker; no program launches |
+| Click the center ASCII pet | Play with the mascot before launching Codex |
 | Launch Codex | Start Codex inside the terminal |
 | Focus terminal | Return keyboard focus to a running CLI |
 | Ctrl+C, inside the terminal | Interrupt Codex using its native controls |
@@ -161,10 +172,10 @@ becomes the initial project folder. Settings are kept for the current app sessio
 python3 scripts/install_launcher.py --folder /path/to/your/project
 ```
 
-Then search for **Codex Island** in your desktop launcher. Omitting `--folder`
+Then search for **Floatty** in your desktop launcher. Omitting `--folder`
 uses the app directory. The shortcut points to this checkout; reinstall it after
 moving the app. It does not enable autostart or require sudo. To remove the
-shortcut, delete `~/.local/share/applications/codex-island.desktop`.
+shortcut, delete `~/.local/share/applications/io.github.nashvel.Floatty.desktop`.
 
 ## Notifications
 
@@ -226,7 +237,8 @@ Keep changes local to this project and avoid persisting terminal or credential d
 | `src/notify_bridge.py` | Completion-only Codex notification bridge |
 | `src/runtime.py` | Docker, listener inspection, safe process stopping, and notifications |
 | `src/folder_picker.py` | Responsive project-directory selection without launching a program |
-| `src/ascii_logo.py` | Animated ASCII launch-screen logo |
+| `src/header_pet.py` | Interactive, state-aware Tk canvas mascot |
+| `src/ascii_logo.py` | Animated ASCII pet playground |
 | `src/widgets.py`, `src/motion.py`, `src/window_shape.py` | Rounded surfaces, cancellable animations, and X11 shaping |
 | `scripts/install_launcher.py`, `launch.sh` | Desktop shortcut and launch entry points |
 | `tests/` | Runtime, terminal, and opt-in desktop regression tests |
@@ -241,7 +253,7 @@ python3 -m compileall -q src scripts tests
 For desktop checks, install ImageMagick and `xdotool`, then run:
 
 ```sh
-CODEX_ISLAND_UI_TEST=1 python3 -m unittest discover -s tests -v
+FLOATTY_UI_TEST=1 python3 -m unittest discover -s tests -v
 ```
 
 Desktop tests briefly open windows, type controlled input into an owned test

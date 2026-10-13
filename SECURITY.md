@@ -1,6 +1,6 @@
 # Security policy
 
-Codex Island is an early Linux desktop project. Fixes target the current `main`
+Floatty is an early Linux desktop project. Fixes target the current `main`
 branch and the latest published release; older releases do not have a separate
 maintenance commitment.
 

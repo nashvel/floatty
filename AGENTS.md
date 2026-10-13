@@ -1,4 +1,4 @@
-# Codex Island
+# Floatty
 
 Independent Linux Python/Tk desktop application. Run commands from this directory.
 Use the standard library; no root installs or shared supervisor changes.

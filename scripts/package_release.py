@@ -23,7 +23,7 @@ def main():
         raise SystemExit('Choose and add LICENSE before building a public release.')
     output = ROOT / 'dist/releases'
     output.mkdir(parents=True, exist_ok=True)
-    name = f'codex-island-{version}'
+    name = f'floatty-{version}'
     archive = output / (name + '.tar.gz')
     members = [ROOT / item for item in FILES]
     for directory, extensions in DIRECTORIES.items():

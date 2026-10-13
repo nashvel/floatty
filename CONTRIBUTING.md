@@ -1,4 +1,4 @@
-# Contributing to Codex Island
+# Contributing to Floatty
 
 Thanks for helping improve this Linux desktop companion. Read [AGENTS.md](AGENTS.md)
 for the terminal, privacy, threading, and process-control boundaries.
@@ -20,7 +20,7 @@ For native desktop acceptance, install Tk, GTK3/VTE, iproute2, ImageMagick and
 xdotool, then run from an X11/XWayland desktop:
 
 ```sh
-CODEX_ISLAND_UI_TEST=1 python3 -m unittest discover -s tests -v
+FLOATTY_UI_TEST=1 python3 -m unittest discover -s tests -v
 ```
 
 The tests type controlled input into an owned terminal and stop only an owned

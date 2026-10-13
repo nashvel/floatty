@@ -49,13 +49,13 @@ jobs:
         run: |
           xvfb-run -a -s '-screen 0 1440x1000x24' dbus-run-session -- sh -c '
             openbox >/dev/null 2>&1 &
-            CODEX_ISLAND_UI_TEST=1 python3 -m unittest discover -s tests -v
+            FLOATTY_UI_TEST=1 python3 -m unittest discover -s tests -v
           '
       - name: Save app-only test screenshots
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: desktop-test-screenshots
-          path: /tmp/codex-island-*.png
+          path: /tmp/floatty-*.png
           if-no-files-found: ignore
           retention-days: 7

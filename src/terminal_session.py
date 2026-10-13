@@ -35,7 +35,7 @@ class TerminalSession:
         self.closed = threading.Event()
         self.generation += 1
         try:
-            self.directory = tempfile.TemporaryDirectory(prefix='codex-island-')
+            self.directory = tempfile.TemporaryDirectory(prefix='floatty-')
             address = str(Path(self.directory.name) / 'complete.sock')
             self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
             self.socket.bind(address)

@@ -16,12 +16,14 @@ from island import Island
 
 
 def main():
-    root = tk.Tk(className='CodexIsland')
+    root = tk.Tk(className='Floatty')
     with patch('island.shutil.which', return_value='/usr/bin/codex'):
         app = Island(root, '/home/developer/projects/my-project', preview=True, motion=False)
     target = ROOT / 'assets/screenshots'
     target.mkdir(parents=True, exist_ok=True)
     try:
+        root.update()
+        app.tick_summary()
         root.update()
         subprocess.run(['import', '-window', str(root.winfo_id()), str(target/'compact.png')], check=True, timeout=5)
         app.collapse()

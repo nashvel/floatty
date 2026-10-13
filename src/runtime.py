@@ -29,7 +29,7 @@ def run(args: list[str], timeout: int = 8) -> str:
 def notify(status: str, folder: str):
     titles = {"completed": "Task completed", "failed": "Task failed", "interrupted": "Task interrupted"}
     try:
-        run(["notify-send", "--app-name=Codex Island", "--", "Codex · " + titles.get(status, status),
+        run(["notify-send", "--app-name=Floatty", "--", "Floatty · " + titles.get(status, status),
              Path(folder).name or folder], timeout=3)
     except IntegrationError:
         return False

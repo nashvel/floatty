@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Codex Island: a small, always-on-top Linux task companion."""
+"""Floatty: a small, always-on-top Linux task companion."""
 from __future__ import annotations
 
 import argparse
-import math
 import os
 from pathlib import Path
 import queue
@@ -17,9 +16,10 @@ from runtime import Docker, IntegrationError, listeners, notify, stop_listener, 
 from terminal_session import TerminalSession
 from window_shape import round_window, remove_decorations
 from widgets import RoundedButton, RoundedPanel
-from motion import Tween, blend
+from motion import Tween
 from ascii_logo import AsciiLogo
 from folder_picker import FolderPicker
+from header_pet import HeaderPet
 
 BG = "#101116"
 PANEL = "#1c1e27"
@@ -52,8 +52,8 @@ class Island:
         self.auto_refresh = False
         self.notifications = tk.BooleanVar(master=root, value=True)
         self.status = tk.StringVar(master=root, value="Choose a project folder, then click Launch Codex.")
-        root.title("Codex Island")
-        self.window_icon = tk.PhotoImage(master=root, file=str(Path(__file__).resolve().parents[1] / "assets/branding/codex-island-256.png"))
+        root.title("Floatty")
+        self.window_icon = tk.PhotoImage(master=root, file=str(Path(__file__).resolve().parents[1] / "assets/branding/codex-island-tile.png")).subsample(4, 4)
         root.iconphoto(True, self.window_icon)
         root.configure(bg=BG)
         root.withdraw()
@@ -75,7 +75,6 @@ class Island:
         root.deiconify()
         root.after(80, self.pump)
         root.after(1000, self.tick)
-        root.after(80, self.pulse)
 
     def button(self, parent, text, command, accent=False):
         return RoundedButton(parent, text, command, BG, ACCENT if accent else PANEL,
@@ -87,15 +86,11 @@ class Island:
     def build(self):
         self.header = tk.Frame(self.root, bg=BG, padx=18, pady=8)
         self.header.pack(fill="x")
-        self.logo_image = tk.PhotoImage(master=self.root, file=str(Path(__file__).resolve().parents[1] / "assets/branding/codex-island-64.png")).subsample(2, 2)
-        self.logo = tk.Label(self.header, image=self.logo_image, bg=BG)
-        self.logo.pack(side="left", padx=(0, 8))
-        self.dot = tk.Label(
-            self.header, text="●", bg=BG, fg=ACCENT, font=("DejaVu Sans", 10))
-        self.dot.pack(side="left", padx=(0, 6))
+        self.pet = HeaderPet(self.header, self.motion.get, lambda: self.state, BG)
+        self.pet.pack(side="left", padx=(0, 8))
         heading = tk.Frame(self.header, bg=BG)
         heading.pack(side="left", fill="x", expand=True)
-        self.title = self.label(heading, "CODEX ISLAND", anchor="w")
+        self.title = self.label(heading, "FLOATTY", anchor="w")
         self.title.configure(font=("DejaVu Sans", 10, "bold"))
         self.title.pack(fill="x")
         self.summary = self.label(heading, self.state, anchor="w")
@@ -105,7 +100,7 @@ class Island:
         self.toggle.pack(side="right")
         self.close_button = self.button(self.header, "×", self.close)
         self.close_button.pack(side="right", padx=4)
-        for widget in (self.header, heading, self.title, self.summary, self.dot, self.logo):
+        for widget in (self.header, heading, self.title, self.summary):
             widget.bind("<Button-1>", self.drag_start)
             widget.bind("<B1-Motion>", self.drag)
             widget.bind("<ButtonRelease-1>", self.header_release)
@@ -262,19 +257,9 @@ class Island:
         self.tick_summary()
 
     def motion_changed(self):
+        self.pet.draw()
         if not self.motion.get():
             self.resize_motion.finish()
-
-    def pulse(self):
-        if self.closing:
-            return
-        active = self.busy and self.state != "Needs you" and self.motion.get()
-        if active:
-            amount = (math.sin(time.monotonic()*math.tau/1.6)+1)/2
-            self.dot.configure(fg=blend("#628348", ACCENT, amount))
-        else:
-            self.dot.configure(fg=ACCENT if self.state in {"Ready", "Completed", "Preview", "Terminal"} else "#f0bd75")
-        self.root.after(80 if active else 500, self.pulse)
 
     def tick_summary(self):
         elapsed = f" · {int(time.monotonic()-self.started)}s" if self.started else ""
@@ -528,6 +513,7 @@ class Island:
             self.terminal.focus()
             return
         self.closing = True
+        self.pet.cancel_animation()
         if self.folder_picker is not None:
             self.folder_picker.close()
         self.resize_motion.cancel()
@@ -562,7 +548,7 @@ def main():
     if not folder.is_dir():
         parser.error("--folder must be an existing directory")
     try:
-        root = tk.Tk(className="CodexIsland")
+        root = tk.Tk(className="Floatty")
     except tk.TclError as exc:
         parser.exit(1, f"Cannot open the desktop display: {exc}\nRun from your Linux desktop session.\n")
     Island(root, folder, args.preview, motion=not args.reduced_motion)
