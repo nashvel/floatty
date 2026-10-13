@@ -21,7 +21,7 @@ jobs:
           node --check site/main.js
           node --check site/pets.mjs
           node --test tests/test_site.mjs
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist/site
   deploy:
