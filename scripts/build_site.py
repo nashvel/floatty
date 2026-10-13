@@ -54,7 +54,8 @@ def main():
     if OUTPUT.exists():
         shutil.rmtree(OUTPUT)  # Only this tool's generated output.
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(ROOT / 'site', OUTPUT, dirs_exist_ok=True)
+    shutil.copy2(ROOT / 'index.html', OUTPUT / 'index.html')
+    shutil.copytree(ROOT / 'site', OUTPUT / 'site', dirs_exist_ok=True)
     for folder in ('branding', 'screenshots'):
         shutil.copytree(ROOT / 'assets' / folder, OUTPUT / 'assets' / folder, dirs_exist_ok=True)
     (OUTPUT / '.nojekyll').touch()

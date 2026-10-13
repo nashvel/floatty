@@ -8,7 +8,8 @@ codex-island/
 ├── assets/
 │   ├── branding/        Supplied SVG/PNG logo set
 │   └── screenshots/     App-only public screenshots
-├── site/                Static HTML showcase, installation guide, CSS/JS
+├── index.html           Static showcase entry point
+├── site/                Installation guide and showcase CSS/JS
 ├── docs/                Architecture and release/Pages instructions
 ├── .github/             CI, draft release, manual Pages, issue/PR templates
 ├── launch.sh            Stable launch entry point
@@ -31,7 +32,7 @@ results. GTK3/VTE lives in a child helper and embeds over X11. Helper stdio carr
 lifecycle metadata only; terminal bytes remain in VTE. The completion bridge
 forwards only a stripped marker through a private Unix socket.
 
-The website is separate from the desktop app. Its builder copies `site/` and
+The website is separate from the desktop app. Its builder copies root `index.html`, the `site/` directory, and
 public visual assets into `dist/site/`, validates internal links and rejects
 links that escape the published directory. Source packaging uses an allowlist;
 neither process publishes by itself.

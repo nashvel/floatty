@@ -6,7 +6,7 @@ import re
 import tarfile
 
 ROOT = Path(__file__).resolve().parents[1]
-FILES = ('launch.sh', 'VERSION', 'README.md', 'AGENTS.md', 'CONTRIBUTING.md', 'SECURITY.md', 'LICENSE')
+FILES = ('index.html', 'launch.sh', 'VERSION', 'README.md', 'AGENTS.md', 'CONTRIBUTING.md', 'SECURITY.md', 'LICENSE')
 DIRECTORIES = {
     'src': {'.py'}, 'scripts': {'.py', '.md'},
     'assets': {'.svg', '.png', '.txt', '.md'}, 'docs': {'.md'},

@@ -82,6 +82,7 @@ class ProjectLayoutTests(unittest.TestCase):
             with tarfile.open(archive) as bundle:
                 names = bundle.getnames()
                 self.assertIn('floatty-0.1.0/src/island.py', names)
+                self.assertIn('floatty-0.1.0/index.html', names)
                 self.assertFalse(any('.env' in n or 'credentials.json' in n or '__pycache__' in n or '/.git/' in n for n in names))
                 self.assertEqual(bundle.getmember('floatty-0.1.0/launch.sh').mode, 0o755)
                 self.assertTrue(all(i.uid == i.gid == 0 and not i.uname and not i.gname for i in bundle.getmembers()))

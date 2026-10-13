@@ -19,4 +19,4 @@ Use the standard library; no root installs or shared supervisor changes.
 
 Validation: `python3 -m unittest discover -s tests -v`, `python3 -m compileall -q src scripts tests`.
 
-Source lives in `src/`; launch with `./launch.sh`. Keep shared branding in `assets/`, maintainer tools in `scripts/`, documentation in `docs/`, and the local-only showcase in `site/`. Build and validate the site with `python3 scripts/build_site.py`. Do not publish, commit, or push unless requested.
+Source lives in `src/`; launch with `./launch.sh`. Keep shared branding in `assets/`, maintainer tools in `scripts/`, documentation in `docs/`, and the local-only showcase entry at root `index.html` with support files in `site/`. Build and validate the site with `python3 scripts/build_site.py`. Do not publish, commit, or push unless requested.

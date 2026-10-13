@@ -265,7 +265,8 @@ binding. CI also exercises the desktop suite under a virtual X11 desktop.
 ## Repository and showcase
 
 Application code lives in `src/`, maintainer tools in `scripts/`, and the
-Pages-ready HTML showcase in `site/`. See [architecture](docs/ARCHITECTURE.md)
+Pages-ready showcase entry in [`index.html`](index.html), with its guide, CSS,
+and JavaScript in `site/`. See [architecture](docs/ARCHITECTURE.md)
 for the full layout and [release/Pages instructions](docs/RELEASING.md) for CI,
 draft source releases, and later publication.
 

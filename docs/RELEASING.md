@@ -76,7 +76,7 @@ python3 scripts/build_site.py
 python3 -m http.server 8000 --bind 127.0.0.1 --directory dist/site
 ```
 
-Visit `http://127.0.0.1:8000/`. Re-run the builder after editing `site/` or shared
+Visit `http://127.0.0.1:8000/`. Re-run the builder after editing root `index.html`, `site/`, or shared
 assets. There are no analytics, remote fonts, account setup or build dependencies.
 The island interactions on the site are explicitly simulated; they cannot start
 Codex or inspect/stop visitors' services.

@@ -38,7 +38,8 @@ containers. CI runs this suite on a virtual X11 desktop.
   Codex CLI version, reproduction steps and actual behavior.
 - Use [SECURITY.md](SECURITY.md) for sensitive vulnerability reports.
 
-The showcase is buildless HTML/CSS/JS in `site/`. Do not add a framework or npm
+The showcase starts at root `index.html`, with buildless HTML/CSS/JS support
+files in `site/`. Do not add a framework or npm
 install for static changes. The site builder checks relative links so it works
 under a GitHub project Pages subdirectory.
 
