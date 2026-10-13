@@ -1,0 +1,17 @@
+name: Bug report
+description: Report a reproducible problem in Codex Island.
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Distribution, desktop, X11 or Wayland, Python, and Codex CLI versions.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps and behavior
+      description: Include steps, expected behavior, and actual behavior. Redact terminal content and credentials.
+    validations:
+      required: true

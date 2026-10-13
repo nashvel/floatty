@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="icon.svg" width="144" alt="Codex Island icon">
+  <img src="assets/branding/codex-island.svg" width="144" alt="Codex Island icon">
 </p>
 
 # Codex Island
@@ -41,13 +41,14 @@ An independent desktop companion for the Codex CLI.
 <img src="assets/screenshots/expanded.png" width="540" alt="Expanded island with Launch Codex, terminal area, and opacity controls">
 
 These screenshots show preview mode, before launching Codex. They contain no
-private conversations or desktop background.
+private conversations or desktop background. Project and executable paths in the
+public screenshots are illustrative.
 
 ## Brand assets
 
 The project logo and its raster sizes, wordmark, tile, and monochrome variants
 are included in [`assets/branding`](assets/branding). The desktop shortcut uses
-`icon.svg`, and the app header and window icon use the matching PNG assets.
+`assets/branding/codex-island.svg`, and the app header and window icon use the matching PNG assets.
 
 ## Requirements
 
@@ -71,7 +72,7 @@ The current implementation has been tested on a Linux desktop with Codex CLI
 ## Quick start
 
 Download or clone the project, then run these commands from the directory
-containing `island.py`.
+containing `launch.sh`.
 
 ### 1. Install system dependencies
 
@@ -108,7 +109,7 @@ screen or credential store.
 Alternatively:
 
 ```sh
-python3 island.py --folder /path/to/your/project
+python3 src/island.py --folder /path/to/your/project
 ```
 
 Click the pill to expand it, then press **Launch Codex** in the Chat tab. Type
@@ -147,7 +148,7 @@ when its own interface has keyboard focus.
 ./launch.sh --preview
 ./launch.sh --reduced-motion
 ./launch.sh --folder /path/to/project --reduced-motion
-python3 island.py --help
+python3 src/island.py --help
 ```
 
 `--preview` opens the interface without launching Codex. `--reduced-motion`
@@ -157,7 +158,7 @@ becomes the initial project folder. Settings are kept for the current app sessio
 ### Application-menu shortcut
 
 ```sh
-python3 install_launcher.py --folder /path/to/your/project
+python3 scripts/install_launcher.py --folder /path/to/your/project
 ```
 
 Then search for **Codex Island** in your desktop launcher. Omitting `--folder`
@@ -219,22 +220,22 @@ Keep changes local to this project and avoid persisting terminal or credential d
 
 | File | Responsibility |
 | --- | --- |
-| `island.py` | Window, terminal launch UI, service cards, status, and controls |
-| `terminal_host.py` | Native GTK3/VTE rendering and X11 embedding |
-| `terminal_session.py` | Owned helper lifecycle and private notification socket |
-| `notify_bridge.py` | Completion-only Codex notification bridge |
-| `runtime.py` | Docker, listener inspection, safe process stopping, and notifications |
-| `folder_picker.py` | Responsive project-directory selection without launching a program |
-| `ascii_logo.py` | Animated ASCII launch-screen logo |
-| `widgets.py`, `motion.py`, `window_shape.py` | Rounded surfaces, cancellable animations, and X11 shaping |
-| `install_launcher.py`, `launch.sh` | Desktop shortcut and launch entry points |
+| `src/island.py` | Window, terminal launch UI, service cards, status, and controls |
+| `src/terminal_host.py` | Native GTK3/VTE rendering and X11 embedding |
+| `src/terminal_session.py` | Owned helper lifecycle and private notification socket |
+| `src/notify_bridge.py` | Completion-only Codex notification bridge |
+| `src/runtime.py` | Docker, listener inspection, safe process stopping, and notifications |
+| `src/folder_picker.py` | Responsive project-directory selection without launching a program |
+| `src/ascii_logo.py` | Animated ASCII launch-screen logo |
+| `src/widgets.py`, `src/motion.py`, `src/window_shape.py` | Rounded surfaces, cancellable animations, and X11 shaping |
+| `scripts/install_launcher.py`, `launch.sh` | Desktop shortcut and launch entry points |
 | `tests/` | Runtime, terminal, and opt-in desktop regression tests |
 
 Run the headless checks:
 
 ```sh
 python3 -m unittest discover -s tests -v
-python3 -m py_compile island.py ascii_logo.py folder_picker.py runtime.py widgets.py motion.py terminal_host.py terminal_session.py notify_bridge.py install_launcher.py
+python3 -m compileall -q src scripts tests
 ```
 
 For desktop checks, install ImageMagick and `xdotool`, then run:
@@ -247,19 +248,35 @@ Desktop tests briefly open windows, type controlled input into an owned test
 terminal, exercise resizing and Ctrl+C, and stop an owned disposable listener.
 They save app-only screenshots under `/tmp`. Tests do not make paid model calls
 or stop existing containers. Unix socket tests skip when sandbox policy forbids
-binding. The current desktop suite contains 28 tests.
+binding. CI also exercises the desktop suite under a virtual X11 desktop.
+
+## Repository and showcase
+
+Application code lives in `src/`, maintainer tools in `scripts/`, and the
+Pages-ready HTML showcase in `site/`. See [architecture](docs/ARCHITECTURE.md)
+for the full layout and [release/Pages instructions](docs/RELEASING.md) for CI,
+draft source releases, and later publication.
+
+```sh
+python3 scripts/build_site.py
+python3 -m http.server 8000 --bind 127.0.0.1 --directory dist/site
+```
+
+Open `http://127.0.0.1:8000/`. The showcase has an interactive island preview
+and a separate installation guide. Website service actions are simulations.
 
 ### Contributing
 
-For a bug report, include your distribution, desktop environment, X11/Wayland
-setup, Python version, Codex CLI version, and steps to reproduce. Redact private
-terminal content from screenshots. For a pull request, describe the behavior
-change, keep the scope focused, and include the relevant checks. Read
-[AGENTS.md](AGENTS.md) for the implementation boundaries and safety requirements.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for checks and pull requests,
+[SECURITY.md](SECURITY.md) for sensitive reports, and [AGENTS.md](AGENTS.md)
+for implementation boundaries. GitHub issue and pull-request templates are included.
 
 ## License
 
-A license has not yet been selected for this standalone project. Add the chosen
-license in a `LICENSE` file before its public open-source release. Third-party
-software, including Codex and the native libraries, retains its own licensing.
-# codex-island
+[MIT](LICENSE). External software, including Codex CLI and native system libraries,
+retains its own licensing. This is an independent project, not affiliated with or
+endorsed by OpenAI.
+
+The island uses a desktop-managed window with its title bar hidden so GNOME can
+recognize app-menu launches. Re-run `python3 scripts/install_launcher.py` after
+moving or updating the app to refresh its desktop shortcut.

@@ -14,7 +14,7 @@ def desktop_quote(value):
 
 
 def main():
-    app = Path(__file__).resolve().parent
+    app = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--folder', type=Path, default=app, help='Initial Codex project folder')
     args = parser.parse_args()
@@ -26,8 +26,8 @@ def main():
     target.write_text(
         '[Desktop Entry]\nType=Application\nName=Codex Island\n'
         'Comment=Floating Codex chat, task notifications, and local services\n'
-        f'Exec={desktop_quote(sys.executable)} {desktop_quote(app / "island.py")} --folder {desktop_quote(folder)}\n'
-        f'Icon={app / "assets/branding/codex-island.svg"}\nTerminal=false\nCategories=Development;\n',
+        f'Exec={desktop_quote(sys.executable)} {desktop_quote(app / "src/island.py")} --folder {desktop_quote(folder)}\n'
+        f'Icon={app / "assets/branding/codex-island.svg"}\nTerminal=false\nStartupNotify=true\nStartupWMClass=CodexIsland\nCategories=Development;\n',
         encoding='utf-8',
     )
     print(f'Installed application-menu shortcut: {target}', flush=True)

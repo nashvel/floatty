@@ -1,2 +1,14 @@
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+*.log
+*.sock
+.coverage
+coverage/
+dist/
+.DS_Store
+.idea/
+.vscode/

@@ -53,3 +53,39 @@ def round_window(window, width, height, radius=24):
         return True
     finally:
         x11.XCloseDisplay(display)
+
+
+def remove_decorations(window):
+    """Keep an X11 window managed by the desktop while hiding its title bar."""
+    try:
+        x11 = c.CDLL('libX11.so.6')
+    except OSError:
+        return False
+    x11.XOpenDisplay.argtypes, x11.XOpenDisplay.restype = [c.c_char_p], c.c_void_p
+    x11.XCloseDisplay.argtypes = [c.c_void_p]
+    x11.XInternAtom.argtypes, x11.XInternAtom.restype = [c.c_void_p, c.c_char_p, c.c_int], c.c_ulong
+    x11.XChangeProperty.argtypes = [c.c_void_p, c.c_ulong, c.c_ulong, c.c_ulong, c.c_int,
+                                   c.c_int, c.c_void_p, c.c_int]
+    x11.XQueryTree.argtypes = [c.c_void_p, c.c_ulong, c.POINTER(c.c_ulong), c.POINTER(c.c_ulong),
+                              c.POINTER(c.POINTER(c.c_ulong)), c.POINTER(c.c_uint)]
+    x11.XFree.argtypes = [c.c_void_p]
+    x11.XFlush.argtypes = [c.c_void_p]
+    display = x11.XOpenDisplay(None)
+    if not display:
+        return False
+    try:
+        root, parent, count = c.c_ulong(), c.c_ulong(), c.c_uint()
+        children = c.POINTER(c.c_ulong)()
+        target = window
+        if x11.XQueryTree(display, window, c.byref(root), c.byref(parent), c.byref(children), c.byref(count)):
+            if children:
+                x11.XFree(children)
+            if parent.value and parent.value != root.value:
+                target = parent.value
+        atom = x11.XInternAtom(display, b'_MOTIF_WM_HINTS', 0)
+        hints = (c.c_ulong * 5)(2, 0, 0, 0, 0)
+        x11.XChangeProperty(display, target, atom, atom, 32, 0, hints, 5)
+        x11.XFlush(display)
+        return True
+    finally:
+        x11.XCloseDisplay(display)

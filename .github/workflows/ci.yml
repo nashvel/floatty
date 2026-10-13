@@ -1,0 +1,61 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  python:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.14']
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Compile application and tools
+        run: python -m compileall -q src scripts tests
+      - name: Run headless regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Build and check Pages site
+        run: python scripts/build_site.py
+      - name: Check browser JavaScript
+        run: node --check site/main.js
+      - name: Validate launcher
+        run: sh -n launch.sh
+  desktop:
+    name: Linux desktop and native terminal
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install desktop test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk libvte-2.91-0 iproute2 imagemagick xdotool xvfb xauth openbox dbus-x11
+      - name: Test under a virtual X11 desktop
+        run: |
+          xvfb-run -a -s '-screen 0 1440x1000x24' dbus-run-session -- sh -c '
+            openbox >/dev/null 2>&1 &
+            CODEX_ISLAND_UI_TEST=1 python3 -m unittest discover -s tests -v
+          '
+      - name: Save app-only test screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: desktop-test-screenshots
+          path: /tmp/codex-island-*.png
+          if-no-files-found: ignore
+          retention-days: 7

@@ -10,6 +10,8 @@ import tkinter as tk
 import unittest
 from unittest.mock import patch
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
+
 from island import Island
 from runtime import Container, Listener, identity
 
@@ -43,6 +45,12 @@ class DesktopTests(unittest.TestCase):
     def wait_frames(self, milliseconds):
         self.root.after(milliseconds, self.root.quit)
         self.root.mainloop()
+
+    def test_window_is_managed_borderless_and_visible(self):
+        self.assertFalse(self.root.overrideredirect())
+        self.assertTrue(self.root.winfo_viewable())
+        self.assertEqual(self.root.winfo_width(), 320)
+        self.assertEqual(self.root.winfo_height(), 58)
 
     def test_folder_picker_is_nonmodal_does_not_launch_and_selects_spaces(self):
         with tempfile.TemporaryDirectory() as directory:

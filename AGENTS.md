@@ -17,4 +17,6 @@ Use the standard library; no root installs or shared supervisor changes.
 - Only stop explicitly selected, confirmed services. Port process signals require pidfds, same-user ownership, start-time revalidation, and a fresh listener check. Protect the app, ancestors, and its Codex process tree.
 - Never store transcripts, environment values, service logs, or tokens in this app.
 
-Validation: `python3 -m unittest discover -s tests -v`, `python3 -m py_compile island.py runtime.py`.
+Validation: `python3 -m unittest discover -s tests -v`, `python3 -m compileall -q src scripts tests`.
+
+Source lives in `src/`; launch with `./launch.sh`. Keep shared branding in `assets/`, maintainer tools in `scripts/`, documentation in `docs/`, and the local-only showcase in `site/`. Build and validate the site with `python3 scripts/build_site.py`. Do not publish, commit, or push unless requested.

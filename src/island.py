@@ -15,7 +15,7 @@ from tkinter import messagebox
 
 from runtime import Docker, IntegrationError, listeners, notify, stop_listener, protected_pids
 from terminal_session import TerminalSession
-from window_shape import round_window
+from window_shape import round_window, remove_decorations
 from widgets import RoundedButton, RoundedPanel
 from motion import Tween, blend
 from ascii_logo import AsciiLogo
@@ -53,10 +53,11 @@ class Island:
         self.notifications = tk.BooleanVar(master=root, value=True)
         self.status = tk.StringVar(master=root, value="Choose a project folder, then click Launch Codex.")
         root.title("Codex Island")
-        self.window_icon = tk.PhotoImage(master=root, file=str(Path(__file__).parent / "assets/branding/codex-island-256.png"))
+        self.window_icon = tk.PhotoImage(master=root, file=str(Path(__file__).resolve().parents[1] / "assets/branding/codex-island-256.png"))
         root.iconphoto(True, self.window_icon)
         root.configure(bg=BG)
-        root.overrideredirect(True)
+        root.withdraw()
+        root.overrideredirect(False)
         root.attributes("-topmost", True)
         root.geometry(f"{COMPACT[0]}x{COMPACT[1]}+{max(0, (root.winfo_screenwidth()-COMPACT[0])//2)}+36")
         root.protocol("WM_DELETE_WINDOW", self.close)
@@ -69,6 +70,9 @@ class Island:
         self.body.pack_forget()
         self.close_button.pack_forget()
         self.toggle.configure(text="+")
+        root.update_idletasks()
+        remove_decorations(root.winfo_id())
+        root.deiconify()
         root.after(80, self.pump)
         root.after(1000, self.tick)
         root.after(80, self.pulse)
@@ -83,7 +87,7 @@ class Island:
     def build(self):
         self.header = tk.Frame(self.root, bg=BG, padx=18, pady=8)
         self.header.pack(fill="x")
-        self.logo_image = tk.PhotoImage(master=self.root, file=str(Path(__file__).parent / "assets/branding/codex-island-64.png")).subsample(2, 2)
+        self.logo_image = tk.PhotoImage(master=self.root, file=str(Path(__file__).resolve().parents[1] / "assets/branding/codex-island-64.png")).subsample(2, 2)
         self.logo = tk.Label(self.header, image=self.logo_image, bg=BG)
         self.logo.pack(side="left", padx=(0, 8))
         self.dot = tk.Label(
@@ -558,7 +562,7 @@ def main():
     if not folder.is_dir():
         parser.error("--folder must be an existing directory")
     try:
-        root = tk.Tk()
+        root = tk.Tk(className="CodexIsland")
     except tk.TclError as exc:
         parser.exit(1, f"Cannot open the desktop display: {exc}\nRun from your Linux desktop session.\n")
     Island(root, folder, args.preview, motion=not args.reduced_motion)
