@@ -55,5 +55,13 @@ pointer reads. Cursor coordinates are never persisted.
 
 Floatty is the application name. The existing checkout and GitHub repository
 remain named `codex-island`; links and supplied logo filenames preserve that
-history. The launch-screen ASCII pet is a separate, lightweight Tk animation
-that stops drawing when the native terminal replaces it.
+history. The launch-screen playground embeds a scaled instance of the same `HeaderPet`
+widget, with its animation driven by the parent canvas. It stops drawing when
+the native terminal replaces it. Browser pets use inline SVG and `pets.mjs`;
+controller tests use Node’s built-in test runner without a browser or framework.
+
+`settings.py` persists only the opacity percentage in the per-user XDG config
+directory (`~/.config/floatty/settings.json` by default). Writes replace the
+file atomically with user-only permissions. Slider writes are debounced, with
+a final flush before normal app close. Tests and public previews inject isolated
+settings paths so they never change the user's preferences.

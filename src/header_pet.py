@@ -5,9 +5,10 @@ import tkinter as tk
 
 
 class HeaderPet(tk.Canvas):
-    def __init__(self, parent, motion, state, background):
-        super().__init__(parent, width=36, height=40, bg=background,
+    def __init__(self, parent, motion, state, background, scale=1, playful=False, auto_animate=True):
+        super().__init__(parent, width=round(36*scale), height=round(40*scale), bg=background,
                          highlightthickness=0, bd=0, cursor='hand2', takefocus=True)
+        self.scale_factor, self.playful = scale, playful
         self.motion, self.state = motion, state
         self.callback = None
         self.hover = self.sleeping = False
@@ -20,12 +21,14 @@ class HeaderPet(tk.Canvas):
         self.bind('<Button-3>', self.nap)
         self.bind('<Return>', self.pet)
         self.bind('<space>', self.pet)
+        self.bind('<n>', self.nap)
         self.bind('<FocusIn>', lambda _: self.draw())
         self.bind('<FocusOut>', lambda _: self.draw())
         self.bind('<Map>', lambda _: self.draw())
         self.bind('<Destroy>', self.destroyed)
         self.draw()
-        self.callback = self.after(80, self.animate)
+        if auto_animate:
+            self.callback = self.after(80, self.animate)
 
     def enter(self, _):
         self.hover = True
@@ -45,9 +48,9 @@ class HeaderPet(tk.Canvas):
             if pointer == (-1, -1):
                 self.gaze = (0, 0)
                 return
-            dx = pointer[0] - (self.winfo_rootx() + 18)
-            dy = pointer[1] - (self.winfo_rooty() + 19)
-            distance = max(50, math.hypot(dx, dy))
+            dx = pointer[0] - (self.winfo_rootx() + 18*self.scale_factor)
+            dy = pointer[1] - (self.winfo_rooty() + 19*self.scale_factor)
+            distance = max(50*self.scale_factor, math.hypot(dx, dy))
             self.gaze = (2.8 * dx / distance, 1.8 * dy / distance)
         except tk.TclError:
             self.gaze = (0, 0)
@@ -87,7 +90,8 @@ class HeaderPet(tk.Canvas):
         self.create_oval(9, 32, 27, 35, fill='#202723', outline='', tags='shadow')
         for x in (12, 24):
             self.create_line(x, y+9, x, y+13, fill=lime, width=3, capstyle='round', tags='feet')
-        arm = 2*math.sin(now*12) if moving and self.mood == 'working' else 0
+        arm = (2*math.sin(now*12) if moving and self.mood == 'working' else
+               3*math.sin(now*4) if moving and self.playful and not self.sleeping else 0)
         self.create_line(6, y+3, 3, y+7+arm, fill=lime, width=2, capstyle='round', tags='arms')
         self.create_line(30, y+3, 33, y+7-arm, fill=lime, width=2, capstyle='round', tags='arms')
         self.create_line(18, y-9, 18, y-13, fill=lime, width=2, tags='antenna')
@@ -113,16 +117,22 @@ class HeaderPet(tk.Canvas):
         self.create_line(15, y+5, 18, y+6.5, 21, y+5, smooth=True,
                          fill=ink, width=1.4, tags='mouth')
         if self.sleeping:
-            self.create_text(30, 6, text='z', fill='#9a9dad', font=('DejaVu Sans', 8), tags='reaction')
+            self.create_text(30, 6, text='z', fill='#9a9dad', font=('DejaVu Sans', round(8*self.scale_factor)), tags='reaction')
         elif happy:
-            self.create_text(30, 6, text='♥', fill='#e9a8bd', font=('DejaVu Sans', 9), tags='reaction')
+            self.create_text(30, 6, text='♥', fill='#e9a8bd', font=('DejaVu Sans', round(9*self.scale_factor)), tags='reaction')
         elif self.mood == 'celebrating':
             for x, top in ((4, 6), (31, 9)):
-                self.create_text(x, top, text='✦', fill=lime, font=('DejaVu Sans', 8), tags='reaction')
+                self.create_text(x, top, text='✦', fill=lime, font=('DejaVu Sans', round(8*self.scale_factor)), tags='reaction')
         elif self.mood == 'attention':
-            self.create_text(31, 6, text='!', fill=lime, font=('DejaVu Sans', 9, 'bold'), tags='reaction')
+            self.create_text(31, 6, text='!', fill=lime, font=('DejaVu Sans', round(9*self.scale_factor), 'bold'), tags='reaction')
         if self.focus_get() == self:
             self.create_line(13, 38, 23, 38, fill='#879d74', width=1, tags='focus')
+
+        if self.scale_factor != 1:
+            self.scale('all', 0, 0, self.scale_factor, self.scale_factor)
+            for item in self.find_all():
+                if self.type(item) == 'line':
+                    self.itemconfigure(item, width=float(self.itemcget(item, 'width'))*self.scale_factor)
 
     def animate(self):
         self.callback = None

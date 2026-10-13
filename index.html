@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#f4f5ef">
   <title>Floatty — Your workspace, within reach</title>
   <link rel="icon" href="assets/branding/codex-island-tile.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="site/styles.css"><script src="site/main.js" defer></script>
+  <link rel="stylesheet" href="site/styles.css"><script src="site/main.js" defer></script><script type="module" src="site/pets.mjs"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -34,20 +34,54 @@ A place for your next idea.
 
 <span>src/</span>   <span>tests/</span>   <span>README.md</span></pre></div>
       <div class="demo-island" id="island-preview">
-        <button class="island-header" id="island-toggle" aria-expanded="false" aria-controls="island-body"><img src="assets/branding/codex-island.svg" alt="" width="27" height="27"><span><strong>FLOATTY</strong><small>Ready · my-project</small></span><span class="expand-mark" aria-hidden="true">+</span></button>
+        <div class="island-header">
+          <button class="web-pet pet-header" id="header-pet" aria-label="Pet Floatty. Press N to toggle a nap." title="Click to pet · Right-click or N to nap"><svg viewBox="0 0 36 40" aria-hidden="true" focusable="false">
+  <ellipse cx="18" cy="34" rx="9" ry="1.5" fill="#263025"/>
+  <g class="pet-figure" fill="#b9f785" stroke-linecap="round">
+    <path d="M12 28v4M24 28v4" fill="none" stroke="#b9f785" stroke-width="3"/>
+    <path class="pet-arm-left" d="M6 22L3 26" fill="none" stroke="#b9f785" stroke-width="2"/>
+    <path class="pet-arm-right" d="M30 22l3 4" fill="none" stroke="#b9f785" stroke-width="2"/>
+    <path d="M18 9V5" fill="none" stroke="#b9f785" stroke-width="2"/><circle cx="18" cy="3" r="2"/>
+    <rect x="6" y="9" width="24" height="20" rx="9"/>
+    <g class="pet-gaze" fill="#18251a" stroke="#18251a">
+      <g class="pet-open-eyes" stroke="none"><ellipse cx="12" cy="19" rx="1.5" ry="2"/><ellipse cx="24" cy="19" rx="1.5" ry="2"/></g>
+      <path class="pet-closed-eyes" d="M10 19h4M22 19h4" fill="none" stroke-width="2"/>
+      <path class="pet-happy-eyes" d="M10 19q2-4 4 0M22 19q2-4 4 0" fill="none" stroke-width="2"/>
+    </g>
+    <path d="M15 24q3 3 6 0" fill="none" stroke="#18251a" stroke-width="1.4"/>
+  </g>
+  <text class="pet-heart" x="27" y="8" font-size="9" fill="#e9a8bd">♥</text>
+  <text class="pet-zzz" x="27" y="8" font-size="8" fill="#a0a79a">z</text>
+</svg></button>
+          <button class="island-toggle" id="island-toggle" aria-expanded="false" aria-controls="island-body"><span><strong>FLOATTY</strong><small>Ready · my-project</small></span><span class="expand-mark" aria-hidden="true">+</span></button>
+        </div>
         <div class="island-body" id="island-body" hidden>
           <div class="demo-project"><strong>my-project</strong><span>~/projects/my-project</span></div>
           <div class="demo-tabs" role="tablist" aria-label="Preview panels"><button id="chat-tab" role="tab" aria-selected="true" aria-controls="chat-panel">Chat</button><button id="services-tab" role="tab" aria-selected="false" aria-controls="services-panel" tabindex="-1">Services</button></div>
           <div id="chat-panel" role="tabpanel" aria-labelledby="chat-tab">
-            <div class="ascii-area"><pre aria-label="ASCII Floatty pet playground">   .---------------------------.
-  /                             \
- |           o                   |
- |        .-----.                |
- |       / o   o \               |
- |      /| \_/ |\     <span class="ascii-ball">(o)</span>       |
- |        '-----'                |
- |         /   \                 |
-  '-----------------------------'</pre><small>A little Floatty. A real terminal.</small></div>
+            <div class="pet-playground">
+              <button class="web-pet pet-center" id="center-pet" aria-label="Pet Floatty in the playground. Press N to toggle a nap." title="Click to pet · Right-click or N to nap"><svg viewBox="0 0 36 40" aria-hidden="true" focusable="false">
+  <ellipse cx="18" cy="34" rx="9" ry="1.5" fill="#263025"/>
+  <g class="pet-figure" fill="#b9f785" stroke-linecap="round">
+    <path d="M12 28v4M24 28v4" fill="none" stroke="#b9f785" stroke-width="3"/>
+    <path class="pet-arm-left" d="M6 22L3 26" fill="none" stroke="#b9f785" stroke-width="2"/>
+    <path class="pet-arm-right" d="M30 22l3 4" fill="none" stroke="#b9f785" stroke-width="2"/>
+    <path d="M18 9V5" fill="none" stroke="#b9f785" stroke-width="2"/><circle cx="18" cy="3" r="2"/>
+    <rect x="6" y="9" width="24" height="20" rx="9"/>
+    <g class="pet-gaze" fill="#18251a" stroke="#18251a">
+      <g class="pet-open-eyes" stroke="none"><ellipse cx="12" cy="19" rx="1.5" ry="2"/><ellipse cx="24" cy="19" rx="1.5" ry="2"/></g>
+      <path class="pet-closed-eyes" d="M10 19h4M22 19h4" fill="none" stroke-width="2"/>
+      <path class="pet-happy-eyes" d="M10 19q2-4 4 0M22 19q2-4 4 0" fill="none" stroke-width="2"/>
+    </g>
+    <path d="M15 24q3 3 6 0" fill="none" stroke="#18251a" stroke-width="1.4"/>
+  </g>
+  <text class="pet-heart" x="27" y="8" font-size="9" fill="#e9a8bd">♥</text>
+  <text class="pet-zzz" x="27" y="8" font-size="8" fill="#a0a79a">z</text>
+</svg></button>
+              <span class="play-ball" aria-hidden="true"></span>
+              <button class="pet-nap" data-pet-target="center-pet" aria-pressed="false">Nap</button>
+              <small class="pet-caption">A little Floatty. A real terminal.</small>
+            </div>
             <p class="demo-note">The desktop app launches your installed CLI.<br>This website is a visual preview.</p>
           </div>
           <div id="services-panel" role="tabpanel" aria-labelledby="services-tab" hidden>
@@ -60,6 +94,7 @@ A place for your next idea.
       </div>
       <div class="click-cue" id="click-cue">Click the island to open <span aria-hidden="true">↗</span></div>
     </div>
+    <p class="pet-note">Meet Floatty: eyes follow your pointer. Click for a heart; right-click or press N for a nap.</p>
     <div class="stage-bottom"><span>Small when you need space. Expanded when you need focus.</span><label class="motion-label"><input id="demo-motion" type="checkbox" checked> Motion</label></div>
   </div>
 </section>
@@ -73,7 +108,7 @@ A place for your next idea.
   </div>
 </section>
 <section class="detail wrap" aria-labelledby="detail-title">
-  <div class="detail-copy"><div class="section-label">03 / A NATIVE LITTLE COMPANION</div><h2 id="detail-title">Make room<br>for your work.</h2><p>Rounded edges. A translucent surface. A playful pet inside the ASCII launch screen. Collapse to a pill whenever you need your desktop back.</p><ul class="simple-list"><li>Adjustable opacity</li><li>Draggable, always within reach</li><li>Motion you can switch off</li><li>Your existing Codex sign-in</li></ul></div>
+  <div class="detail-copy"><div class="section-label">03 / A NATIVE LITTLE COMPANION</div><h2 id="detail-title">Make room<br>for your work.</h2><p>Rounded edges. A translucent surface. A playful little mascot in its own launch-screen playground. Collapse to a pill whenever you need your desktop back.</p><ul class="simple-list"><li>Adjustable opacity</li><li>Draggable, always within reach</li><li>A pet that follows your pointer</li><li>Motion you can switch off</li><li>Your existing Codex sign-in</li></ul></div>
   <figure class="app-shot"><img src="assets/screenshots/expanded.png" alt="Expanded Floatty interface with Chat and Services tabs, opacity slider, and Launch Codex control" loading="lazy" width="540" height="620"><figcaption>Actual app · preview mode · Linux</figcaption></figure>
 </section>
 <section class="get-started wrap" aria-labelledby="get-started-title"><div><div class="section-label">04 / YOUR NEXT WORKSPACE</div><h2 id="get-started-title">Find your island.</h2><p>Linux. Python 3.10+. Your Codex CLI.<br>A few system packages, and you’re ready.</p></div><a class="button primary" href="site/guide.html">Installation guide <span aria-hidden="true">↗</span></a></section>

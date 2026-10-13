@@ -13,14 +13,17 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
 from island import Island
+from settings import OpacitySettings
 from runtime import Container, Listener, identity
 
 
 @unittest.skipUnless(os.environ.get('FLOATTY_UI_TEST', os.environ.get('CODEX_ISLAND_UI_TEST')) == '1', 'Desktop acceptance is opt-in')
 class DesktopTests(unittest.TestCase):
     def setUp(self):
+        self.settings_directory = tempfile.TemporaryDirectory()
+        self.settings_store = OpacitySettings(Path(self.settings_directory.name)/'settings.json')
         self.root = tk.Tk()
-        self.app = Island(self.root, '/tmp', preview=True, motion=False)
+        self.app = Island(self.root, '/tmp', preview=True, motion=False, settings=self.settings_store)
         self.root.update()
 
     def tearDown(self):
@@ -41,6 +44,7 @@ class DesktopTests(unittest.TestCase):
         self.root.destroy()
         self.app = self.root = None
         gc.collect()
+        self.settings_directory.cleanup()
 
     def wait_frames(self, milliseconds):
         self.root.after(milliseconds, self.root.quit)
@@ -132,6 +136,33 @@ class DesktopTests(unittest.TestCase):
             pet.draw(now=1)
             self.assertEqual(pet.gaze, (0, 0))
 
+    def test_opacity_is_saved_on_change_and_restored_on_reopen(self):
+        self.app.opacity.set(65)
+        self.app.apply_opacity()
+        self.wait_frames(350)
+        self.assertEqual(self.settings_store.load(), 65)
+        # Flush a final change on normal close even before the debounce expires.
+        self.app.opacity.set(72)
+        self.app.apply_opacity()
+        self.app.close()
+        self.root.mainloop()
+        self.assertEqual(self.settings_store.load(), 72)
+        self.root = tk.Tk()
+        self.app = Island(self.root, '/tmp', preview=True, motion=False,
+                          settings=OpacitySettings(self.settings_store.path))
+        self.root.update()
+        self.assertEqual(self.app.opacity.get(), 72)
+        self.assertAlmostEqual(float(self.root.attributes('-alpha')), .72, places=2)
+
+    def test_opacity_save_failure_keeps_live_control_and_reports_error(self):
+        with patch.object(self.settings_store, 'save', side_effect=OSError('Not writable')):
+            self.app.opacity.set(65)
+            self.app.apply_opacity()
+            self.wait_frames(350)
+            self.assertAlmostEqual(float(self.root.attributes('-alpha')), .65, places=2)
+            self.assertIn('could not be saved', self.app.status.get())
+            self.assertFalse(self.settings_store.path.exists())
+
     def test_window_is_managed_borderless_and_visible(self):
         self.assertFalse(self.root.overrideredirect())
         self.assertTrue(self.root.winfo_viewable())
@@ -219,57 +250,60 @@ class DesktopTests(unittest.TestCase):
         self.assertTrue(self.root.winfo_viewable())
         self.assertEqual(self.app.launch_button.cget('state'), 'normal')
 
-    def test_ascii_logo_motion_reduced_motion_and_launch_hiding(self):
+    def test_center_pet_motion_reduced_motion_and_launch_hiding(self):
         self.app.collapse()
         self.root.update()
-        logo = self.app.terminal_hint
-        self.assertTrue(logo.winfo_ismapped())
+        playground = self.app.terminal_hint
+        self.assertTrue(playground.winfo_ismapped())
+        self.assertEqual(playground.pet.scale_factor, 3)
+        self.assertTrue(playground.pet.playful)
         self.app.motion.set(True)
-        logo.draw(now=0.0)
-        first = [(logo.itemcget(item, 'text'), logo.itemcget(item, 'fill'), logo.coords(item))
-                 for item in logo.find_all()]
-        logo.draw(now=1.3)
-        second = [(logo.itemcget(item, 'text'), logo.itemcget(item, 'fill'), logo.coords(item))
-                  for item in logo.find_all()]
-        self.assertNotEqual(first, second)
-        self.assertTrue(all(logo.itemcget(item, 'text').isascii() for item in logo.find_all()))
+        playground.draw(now=0)
+        first = playground.coords(playground.pet_item)
+        ball = playground.coords(playground.find_withtag('ball')[0])
+        playground.draw(now=1.3)
+        self.assertNotEqual(first, playground.coords(playground.pet_item))
+        self.assertNotEqual(ball, playground.coords(playground.find_withtag('ball')[0]))
         self.app.motion.set(False)
-        logo.draw(now=0.0)
-        still = [(logo.itemcget(item, 'text'), logo.itemcget(item, 'fill'), logo.coords(item))
-                 for item in logo.find_all()]
-        logo.draw(now=1.3)
-        self.assertEqual(still, [(logo.itemcget(item, 'text'), logo.itemcget(item, 'fill'), logo.coords(item))
-                                for item in logo.find_all()])
+        playground.draw(now=0)
+        still = playground.coords(playground.pet_item)
+        ball = playground.coords(playground.find_withtag('ball')[0])
+        body = playground.pet.coords(playground.pet.find_withtag('body')[0])
+        playground.draw(now=1.3)
+        self.assertEqual(still, playground.coords(playground.pet_item))
+        self.assertEqual(ball, playground.coords(playground.find_withtag('ball')[0]))
+        self.assertEqual(body, playground.pet.coords(playground.pet.find_withtag('body')[0]))
         self.app.preview = False
         with patch.object(self.app.terminal, 'start'):
             self.app.launch_terminal()
         self.root.update()
-        self.assertFalse(logo.winfo_ismapped())
+        self.assertFalse(playground.winfo_ismapped())
+        self.assertFalse(playground.pet.winfo_ismapped())
 
-    def test_floatty_name_and_center_ascii_pet_play(self):
+    def test_floatty_center_drawn_pet_play_and_nap(self):
         self.assertEqual(self.root.title(), 'Floatty')
-        self.assertEqual(self.app.title.cget('text'), 'FLOATTY')
         self.app.collapse()
         self.root.update()
-        logo = self.app.terminal_hint
-        self.assertEqual(len(logo.find_withtag('pet')), 6)
-        self.assertEqual(len(logo.find_withtag('ball')), 1)
-        self.assertEqual(logo.itemcget(logo.find_withtag('caption')[0], 'text'), 'F L O A T T Y')
-        self.app.motion.set(True)
-        logo.draw(now=1)
-        position = logo.coords(logo.find_withtag('pet')[0])
-        logo.draw(now=2)
-        self.assertNotEqual(position, logo.coords(logo.find_withtag('pet')[0]))
-        with patch.object(self.app.terminal, 'start') as start, patch('ascii_logo.time.monotonic', return_value=5):
-            logo.event_generate('<Button-1>', x=210, y=100)
-            self.assertTrue(logo.find_withtag('reaction'))
-            self.assertEqual(logo.play_until, 7.4)
+        playground = self.app.terminal_hint
+        self.assertEqual(playground.pet.type(playground.pet.find_withtag('body')[0]), 'polygon')
+        self.assertEqual(playground.type(playground.find_withtag('ball')[0]), 'oval')
+        self.assertEqual(playground.itemcget(playground.find_withtag('caption')[0], 'text'), 'F L O A T T Y')
+        with patch.object(self.app.terminal, 'start') as start, patch('header_pet.time.monotonic', return_value=5):
+            playground.event_generate('<Button-1>', x=210, y=100)
+            self.assertEqual(playground.pet.mood, 'happy')
+            self.assertTrue(playground.pet.find_withtag('reaction'))
             start.assert_not_called()
-        self.app.motion.set(False)
-        logo.draw(now=6)
-        self.assertEqual(logo.itemcget(logo.find_withtag('reaction')[0], 'text'), 'hello!')
-        logo.draw(now=8)
-        self.assertFalse(logo.find_withtag('reaction'))
+        playground.pet.nap()
+        self.assertTrue(playground.pet.sleeping)
+        self.app.motion.set(True)
+        playground.draw(now=1)
+        first = playground.coords(playground.pet_item)
+        ball = playground.coords(playground.find_withtag('ball')[0])
+        playground.draw(now=2)
+        self.assertEqual(first, playground.coords(playground.pet_item))
+        self.assertEqual(ball, playground.coords(playground.find_withtag('ball')[0]))
+        playground.pet.pet()
+        self.assertFalse(playground.pet.sleeping)
 
     def test_animation_intermediate_frame_and_rapid_reversal(self):
         self.app.motion.set(True)

@@ -20,9 +20,9 @@ The current source repository remains `nashvel/codex-island`.
   Right-click toggles an idle nap; the Motion setting controls automatic animation.
   Eyes follow the desktop cursor outside the island too, including with reduced motion.
 
-- **Animated ASCII logo** — a lime ASCII pet that bounces, waves, and plays with
-  a ball inside the launch-screen capsule. Click it for a playful reaction;
-  the Motion setting also controls this animation.
+- **Pet playground** — a larger version of the actual header mascot waves and
+  floats beside a bouncing ball before you launch Codex. Click to pet it or
+  right-click for a nap; it follows your pointer and respects reduced motion.
 - **Real terminal** — native GTK3/VTE rendering, ANSI colors, cursor movement,
   scrollback, resizing, and direct keyboard input.
 - **Launch Codex** — starts the installed CLI in your chosen directory with your
@@ -45,7 +45,7 @@ The current source repository remains `nashvel/codex-island`.
 
 **Expanded**
 
-<img src="assets/screenshots/expanded.png" width="540" alt="Expanded island with interactive pet, ASCII logo, Launch Codex, and opacity controls">
+<img src="assets/screenshots/expanded.png" width="540" alt="Expanded island with interactive pet playground, Launch Codex, and opacity controls">
 
 These screenshots show preview mode, before launching Codex. They contain no
 private conversations or desktop background. Project and executable paths in the
@@ -129,10 +129,10 @@ directly in the terminal. Codex starts only when you press Launch.
 | --- | --- |
 | Click the header or + / − | Expand or collapse |
 | Click the pet / Enter or Space while focused | Pet the mascot without expanding or launching anything |
-| Right-click the pet | Toggle a nap when Codex is idle; submitting a task wakes it |
+| Right-click the pet / N while focused | Toggle a nap when Codex is idle; submitting a task wakes it |
 | Drag the header | Reposition the island |
 | Folder | Open a non-blocking project-folder picker; no program launches |
-| Click the center ASCII pet | Play with the mascot before launching Codex |
+| Click the center pet | Play with the mascot before launching Codex |
 | Launch Codex | Start Codex inside the terminal |
 | Focus terminal | Return keyboard focus to a running CLI |
 | Ctrl+C, inside the terminal | Interrupt Codex using its native controls |
@@ -164,7 +164,18 @@ python3 src/island.py --help
 
 `--preview` opens the interface without launching Codex. `--reduced-motion`
 uses immediate transitions. Without `--folder`, the current working directory
-becomes the initial project folder. Settings are kept for the current app session.
+becomes the initial project folder. Opacity is restored from a local JSON file on startup. Notification and motion
+preferences are kept for the current app session.
+
+Opacity changes are saved automatically to `$XDG_CONFIG_HOME/floatty/settings.json`,
+or `~/.config/floatty/settings.json` by default:
+
+```json
+{ "opacity": 82 }
+```
+
+The value is a percentage from 55 to 100. Missing or invalid settings use 82%.
+The file contains appearance preferences only and stays outside the checkout.
 
 ### Application-menu shortcut
 
@@ -237,8 +248,9 @@ Keep changes local to this project and avoid persisting terminal or credential d
 | `src/notify_bridge.py` | Completion-only Codex notification bridge |
 | `src/runtime.py` | Docker, listener inspection, safe process stopping, and notifications |
 | `src/folder_picker.py` | Responsive project-directory selection without launching a program |
+| `src/settings.py` | Validated local JSON opacity storage and atomic writes |
 | `src/header_pet.py` | Interactive, state-aware Tk canvas mascot |
-| `src/ascii_logo.py` | Animated ASCII pet playground |
+| `src/pet_playground.py` | Drawn launch-screen playground sharing the header mascot |
 | `src/widgets.py`, `src/motion.py`, `src/window_shape.py` | Rounded surfaces, cancellable animations, and X11 shaping |
 | `scripts/install_launcher.py`, `launch.sh` | Desktop shortcut and launch entry points |
 | `tests/` | Runtime, terminal, and opt-in desktop regression tests |
@@ -275,8 +287,8 @@ python3 scripts/build_site.py
 python3 -m http.server 8000 --bind 127.0.0.1 --directory dist/site
 ```
 
-Open `http://127.0.0.1:8000/`. The showcase has an interactive island preview
-and a separate installation guide. Website service actions are simulations.
+Open `http://127.0.0.1:8000/`. The showcase has interactive, pointer-following pets in its island header and
+playground, plus a separate installation guide. Website service actions are simulations.
 
 ### Contributing
 

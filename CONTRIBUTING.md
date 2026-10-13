@@ -13,6 +13,8 @@ python3 -m compileall -q src scripts tests
 python3 -m unittest discover -s tests -v
 python3 scripts/build_site.py
 node --check site/main.js
+node --check site/pets.mjs
+node --test tests/test_site.mjs
 sh -n launch.sh
 ```
 
@@ -37,6 +39,9 @@ containers. CI runs this suite on a virtual X11 desktop.
 - For bugs, include Linux distribution, desktop, display mode, Python version,
   Codex CLI version, reproduction steps and actual behavior.
 - Use [SECURITY.md](SECURITY.md) for sensitive vulnerability reports.
+
+Website checks use Node's built-in test runner; the desktop app does not require
+Node or npm packages.
 
 The showcase starts at root `index.html`, with buildless HTML/CSS/JS support
 files in `site/`. Do not add a framework or npm

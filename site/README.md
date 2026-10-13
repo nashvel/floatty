@@ -3,6 +3,7 @@
 - [`../index.html`](../index.html): product overview and interactive, explicitly simulated island.
 - `guide.html`: installation, controls and troubleshooting.
 - `styles.css`: responsive layouts, brand palette and reduced-motion support.
+- `pets.mjs`: pointer-following SVG pets, petting reactions, and accessible nap controls.
 - `main.js`: preview expand/collapse, keyboard-accessible tabs, simulated confirmation and copy buttons.
 
 Run `python3 scripts/build_site.py` from the repository root. The builder assembles

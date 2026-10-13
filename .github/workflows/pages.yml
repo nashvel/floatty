@@ -17,7 +17,10 @@ jobs:
           persist-credentials: false
       - uses: actions/configure-pages@v5
       - run: python3 scripts/build_site.py
-      - run: node --check site/main.js
+      - run: |
+          node --check site/main.js
+          node --check site/pets.mjs
+          node --test tests/test_site.mjs
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist/site

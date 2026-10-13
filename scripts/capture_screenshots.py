@@ -7,18 +7,22 @@ Never launches Codex or queries services.
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import tkinter as tk
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
 from island import Island
+from settings import OpacitySettings
 
 
 def main():
+    preview_settings = tempfile.TemporaryDirectory(prefix='floatty-preview-')
     root = tk.Tk(className='Floatty')
     with patch('island.shutil.which', return_value='/usr/bin/codex'):
-        app = Island(root, '/home/developer/projects/my-project', preview=True, motion=False)
+        app = Island(root, '/home/developer/projects/my-project', preview=True, motion=False,
+                     settings=OpacitySettings(Path(preview_settings.name)/'settings.json'))
     target = ROOT / 'assets/screenshots'
     target.mkdir(parents=True, exist_ok=True)
     try:
@@ -45,6 +49,7 @@ def main():
         for callback in root.tk.call('after', 'info'):
             root.after_cancel(callback)
         root.destroy()
+        preview_settings.cleanup()
     print('Saved app-only preview screenshots with illustrative paths.')
 
 if __name__ == '__main__':

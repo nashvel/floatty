@@ -17,9 +17,10 @@ from terminal_session import TerminalSession
 from window_shape import round_window, remove_decorations
 from widgets import RoundedButton, RoundedPanel
 from motion import Tween
-from ascii_logo import AsciiLogo
+from pet_playground import PetPlayground
 from folder_picker import FolderPicker
 from header_pet import HeaderPet
+from settings import OpacitySettings, opacity_value
 
 BG = "#101116"
 PANEL = "#1c1e27"
@@ -31,7 +32,7 @@ EXPANDED = (540, 620)
 
 
 class Island:
-    def __init__(self, root, folder, preview=False, motion=True):
+    def __init__(self, root, folder, preview=False, motion=True, settings=None):
         self.root, self.folder, self.preview = root, str(Path(folder).resolve()), preview
         self.events = queue.Queue()
         self.terminal = TerminalSession(self.events)
@@ -47,7 +48,10 @@ class Island:
         self.rows = []
         self.stopping = set()
         self.service_buttons = {}
-        self.opacity = tk.DoubleVar(master=root, value=82)
+        self.settings = settings if settings is not None else OpacitySettings()
+        self.saved_opacity = self.settings.load()
+        self.opacity_save_callback = None
+        self.opacity = tk.DoubleVar(master=root, value=self.saved_opacity)
         self.refreshing = False
         self.auto_refresh = False
         self.notifications = tk.BooleanVar(master=root, value=True)
@@ -149,7 +153,7 @@ class Island:
         self.terminal_container = tk.Frame(terminal_panel.content, bg=PANEL)
         self.terminal_container.pack(fill="both", expand=True)
         self.terminal_container.bind('<Configure>', self.terminal_resize)
-        self.terminal_hint = AsciiLogo(self.terminal_container, self.motion.get, PANEL)
+        self.terminal_hint = PetPlayground(self.terminal_container, self.motion.get, PANEL, state=lambda: self.state)
         self.terminal_hint.place(relx=0.5, rely=0.5, anchor="center")
         controls = tk.Frame(chat, bg=BG)
         controls.pack(fill="x", pady=12)
@@ -196,10 +200,28 @@ class Island:
             self.root.after_idle(self.apply_opacity)
 
     def apply_opacity(self, _=None):
+        value = opacity_value(self.opacity.get())
         try:
-            self.root.attributes("-alpha", self.opacity.get()/100)
+            self.root.attributes("-alpha", value/100)
         except tk.TclError:
             self.status.set("Window transparency is unavailable on this desktop.")
+        if not self.closing and value != self.saved_opacity:
+            if self.opacity_save_callback is not None:
+                self.root.after_cancel(self.opacity_save_callback)
+            self.opacity_save_callback = self.root.after(250, self.save_opacity)
+
+    def save_opacity(self):
+        if self.opacity_save_callback is not None:
+            self.root.after_cancel(self.opacity_save_callback)
+            self.opacity_save_callback = None
+        value = opacity_value(self.opacity.get())
+        if value == self.saved_opacity:
+            return
+        try:
+            self.settings.save(value)
+            self.saved_opacity = value
+        except OSError:
+            self.status.set("Opacity changed, but settings could not be saved.")
 
     def shape(self, event):
         if event.widget != self.root or self.closing:
@@ -512,6 +534,7 @@ class Island:
             self.root.update_idletasks()
             self.terminal.focus()
             return
+        self.save_opacity()
         self.closing = True
         self.pet.cancel_animation()
         if self.folder_picker is not None:

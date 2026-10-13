@@ -10,7 +10,7 @@ FILES = ('index.html', 'launch.sh', 'VERSION', 'README.md', 'AGENTS.md', 'CONTRI
 DIRECTORIES = {
     'src': {'.py'}, 'scripts': {'.py', '.md'},
     'assets': {'.svg', '.png', '.txt', '.md'}, 'docs': {'.md'},
-    'site': {'.html', '.css', '.js', '.md'}, 'tests': {'.py'},
+    'site': {'.html', '.css', '.js', '.mjs', '.md'}, 'tests': {'.py', '.mjs'},
     '.github': {'.yml', '.yaml', '.md'},
 }
 
